@@ -2,7 +2,6 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 namespace XCDN.WebService 
 {
     public class DiskFileIO : IFileIO {
@@ -15,13 +14,14 @@ namespace XCDN.WebService
             Directory.CreateDirectory(path);
             
         }
-        public async Task<string> Write(IFormFile file)
-        {   var filename = Path.GetRandomFileName();
+        public async Task<string> Write(MemoryStream ms, string filename)
+        {
+           
+            filename = Path.ChangeExtension(Path.GetRandomFileName(),  Path.GetExtension(filename) );
             var filePath =  Path.Join(_path , filename );
-            if(file.Length == 0)
-                throw new FileLoadException();
+    
 
-            using(var stream = new FileStream 
+            using(var fs = new FileStream 
                 (
                     filePath , FileMode.Create ,
                     FileAccess.Write , FileShare.None,
@@ -29,15 +29,15 @@ namespace XCDN.WebService
                 )
             )
             {
-                await file.CopyToAsync(stream);
-               
+                await ms.CopyToAsync(fs); 
             }
             return filename;
             
         }
 
         public FileStream Read(string filename) 
-        {   var filePath =  Path.Join(_path, filename);
+        {   
+            var filePath =  Path.Join(_path, filename);
             var stream = new FileStream 
                 (
                     filePath , FileMode.Open ,

@@ -27,6 +27,8 @@ namespace XCDN.WebService
         private string staticFolder => 
             Path.Join(Environment.CurrentDirectory , Environment.GetEnvironmentVariable("FOLDER"));
         private int bufferSize => int.Parse(Environment.GetEnvironmentVariable("BUFFER_SIZE"));
+        private string fileMapPath => 
+             Path.Join(Environment.CurrentDirectory , Environment.GetEnvironmentVariable("FILES_MAP_PATH"));
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -34,6 +36,7 @@ namespace XCDN.WebService
         {
 
             services.AddSingleton<IFileIO>(service => new DiskFileIO( staticFolder , bufferSize ) );
+            services.AddSingleton<CheckSumManager>(new CheckSumManager(fileMapPath));
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
